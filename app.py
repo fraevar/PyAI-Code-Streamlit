@@ -1,4 +1,4 @@
-# Estudo de Caso 1 - DSA PyAI Coder - Criando Seu Assistente de Programação Python, em Python
+# Criando Assistente de Programação Python, para auxiliar os amantes em Python
 
 # Importa módulo para interagir com o sistema operacional
 import os
