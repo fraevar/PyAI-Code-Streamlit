@@ -62,10 +62,7 @@ with st.sidebar:
     st.link_button("✉️ E-mail Para Dúvidas", "mailto:evandrorf34@gmail.com")
 
 # Título principal do app
-st.title("Estudo de Criação - PyAI Coder Para Python")
-
-# Subtítulo adicional
-st.title("Assistente Pessoal de Programação Python 🐍")
+st.title("PyAI Coder - Assistente Pessoal de Programação Python 🐍")
 
 # Texto auxiliar abaixo do título
 st.caption("Faça sua pergunta sobre a Linguagem Python e obtenha código, explicações e referências.")
