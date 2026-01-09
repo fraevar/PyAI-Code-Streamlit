@@ -8,9 +8,14 @@ import streamlit as st
 
 # Importa a classe Groq para se conectar à API da plataforma Groq e acessar o LLM
 from groq import Groq
-#from openai import openai
 
+
+from dotenv import load_dotenv
 # Configura a página do Streamlit com título, ícone, layout e estado inicial da sidebar
+load_dotenv()
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
 st.set_page_config(
     page_title="ExPy Coder",
     page_icon="🤖",
@@ -190,9 +195,10 @@ with st.sidebar:
     #st.markdown("<br>", unsafe_allow_html=True)
 
     # Campo para inserir a chave de API da Groq
-    groq_api_key = st.text_input(
+
+    groq_api_key_input = st.text_input(
         "Insira aqui a sua API Key Groq", 
-        type="default", #Removendo o "password",
+        type="password",
         help="Obtenha sua chave em https://console.groq.com/keys"
     )
 
@@ -232,55 +238,48 @@ for message in st.session_state.messages:
 # Inicializa a variável do cliente Groq como None
 client = None
 
-# Verifica se o usuário forneceu a chave de API da Groq ou usa chave de exemplo
-if groq_api_key:
-    # Usa a chave fornecida pelo usuário
-    try:
-        client = Groq(api_key = groq_api_key)
-    except Exception as e:
-        st.sidebar.error(f"Erro ao inicializar o cliente Groq: {e}")
-        st.stop()
-else:
-    # Usa chave de exemplo quando o campo estiver vazio
-    try:
-        example_key = "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"
-        client = Groq(api_key = example_key)
-        # Armazena que está usando chave de exemplo para mostrar aviso depois
-        if "using_example_key" not in st.session_state:
-            st.session_state.using_example_key = True
-    except Exception as e:
-        st.sidebar.error(f"Erro ao inicializar o cliente Groq com chave de exemplo: {e}")
-        st.stop()
-        st.stop()
+# Decide qual API Key usar:
+# 1️ variável de ambiente (.env)
+# 2️ input do usuário
+api_key = GROQ_API_KEY or groq_api_key_input
 
+# Se nenhuma chave foi informada, interrompe a aplicação
+if not api_key:
+    st.warning("Informe sua API Key da Groq para continuar.")
+    st.stop()
+
+# Inicializa o cliente Groq
+try:
+    client = Groq(api_key=api_key)
+except Exception as e:
+    st.error(f"Erro ao inicializar o cliente Groq: {e}")
+    st.stop()
+
+if not st.session_state.get("api_warning_shown", False):
+    st.markdown("""
+    <style>
+    div[data-testid="toast"] {
+        background-color: #ff6b35 !important;
+    }
+    div[data-testid="toast"] > div {
+        background-color: #ff6b35 !important;
+        color: white !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.toast(
+        "ℹ️ Você está utilizando a API gratuita da Groq, que possui limites de uso. "
+        "Para maior estabilidade e continuidade, utilize sua própria API Key.",
+        icon="🤖"
+    )
+
+    st.session_state.api_warning_shown = True
 
 
 # Captura a entrada do usuário no chat
 if prompt := st.chat_input("Qual sua dúvida sobre Python, Excel ou VBA?"):
-    
-    # Mostra aviso se estiver usando chave de exemplo (apenas uma vez por sessão)
-    if st.session_state.get("using_example_key", False):
-        # Adiciona CSS para personalizar a cor do toast
-        st.markdown("""
-        <style>
-        div[data-testid="toast"] {
-            background-color: #ff6b35 !important;
-        }
-        div[data-testid="toast"] > div {
-            background-color: #ff6b35 !important;
-            color: white !important;
-        }
-        div[data-testid="toast"] .stMarkdown {
-            color: white !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        # Mostra o toast por mais tempo
-        st.toast("⚠️ Usando chave de exemplo para demonstração. Para acesso completo, insira sua API Key na barra lateral.", icon="⚠️")
-        
-        st.session_state.using_example_key = False  # Remove o flag para não mostrar novamente
-    
+   
     # Armazena a mensagem do usuário no estado da sessão
     st.session_state.messages.append({"role": "user", "content": prompt})
     
