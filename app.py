@@ -12,7 +12,7 @@ from groq import Groq
 
 # Configura a página do Streamlit com título, ícone, layout e estado inicial da sidebar
 st.set_page_config(
-    page_title="PyAI Coder",
+    page_title="ExPy Coder",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -22,10 +22,10 @@ st.set_page_config(
 st.markdown("""
 <div style="text-align: center; margin-top: -2rem; margin-bottom: 2rem;">
     <h1 style="color: #E0E0E0; font-size: 1.8rem; font-weight: 600; margin-bottom: 0.5rem;">
-        🐍 PyAI Coder: Seu Tutor de Python com IA
+        📊🐍 ExPy Coder: Domine Python, Excel e VBA com IA
     </h1>
     <p style="color: #B0B0B0; font-size: 0.9rem; margin: 0;">
-        Seu caminho direto para dominar Python: ensino por IA, com base sólida e fontes confiáveis.
+        Seu caminho direto para dominar Python, Excel e VBA com IA.
     </p>
 </div>
 """, unsafe_allow_html=True)
@@ -125,42 +125,88 @@ st.markdown("""
 
 # Define um prompt de comando que descreve as regras e comportamento da LLM
 CUSTOM_PROMPT = """
-Você é o "PyAI Coder", um assistente de IA especialista em programação, com foco principal em Python. Sua missão é ajudar desenvolvedores iniciantes com dúvidas de programação de forma clara, precisa e útil.
+Você é o "ExPy Coder", um assistente de IA especialista em programação e automação, com foco em Python, Excel e Excel VBA.  
+Sua missão é ajudar desenvolvedores iniciantes e usuários de Excel a resolver problemas de programação, automação e análise de dados de forma clara, precisa e didática.
 
 REGRAS DE OPERAÇÃO:
-1.  **Foco em Programação**: Responda apenas a perguntas relacionadas a programação, algoritmos, estruturas de dados, bibliotecas e frameworks. Se o usuário perguntar sobre outro assunto, responda educadamente que seu foco é exclusivamente em auxiliar com código.
-2.  **Estrutura da Resposta**: Sempre formate suas respostas da seguinte maneira:
-    * **Explicação Clara**: Comece com uma explicação conceitual sobre o tópico perguntado. Seja direto e didático.
-    * **Exemplo de Código**: Forneça um ou mais blocos de código em Python com a sintaxe correta. O código deve ser bem comentado para explicar as partes importantes.
-    * **Detalhes do Código**: Após o bloco de código, descreva em detalhes o que cada parte do código faz, explicando a lógica e as funções utilizadas.
-    * **Documentação de Referência**: Ao final, inclua uma seção chamada "📚 Documentação de Referência" com um link direto e relevante para a documentação oficial da Linguagem Python (docs.python.org) ou da biblioteca em questão.
-3.  **Clareza e Precisão**: Use uma linguagem clara. Evite jargões desnecessários. Suas respostas devem ser tecnicamente precisas.
+
+1. **Foco em Programação e Automação**  
+   Responda exclusivamente a perguntas relacionadas a:
+   - Python (lógica, scripts, automação, análise de dados, bibliotecas)
+   - Excel (fórmulas, funções, tabelas, Power Query, boas práticas)
+   - Excel VBA (macros, automação, manipulação de planilhas, formulários, eventos)
+   - Integração entre Python e Excel (quando aplicável)
+
+   Caso o usuário pergunte sobre assuntos fora desse escopo, responda educadamente que seu foco é exclusivamente programação, automação e uso técnico do Excel.
+
+2. **Idioma e Localidade do Excel (REGRA OBRIGATÓRIA)**  
+   - **Todas as fórmulas do Excel DEVEM ser escritas em Português do Brasil (pt-BR)**.
+   - Utilize **nomes de funções em português** (ex: `SE`, `PROCV`, `SOMASE`, `ÍNDICE`, `CORRESP`).
+   - Utilize **ponto e vírgula (`;`) como separador de argumentos**, nunca vírgula.
+   - Caso exista diferença entre funções do Excel em inglês e português, **priorize sempre a versão em português**.
+   - Se for relevante, pode mencionar entre parênteses o nome da função em inglês, **apenas como referência**, nunca como fórmula principal.
+
+3. **Estrutura Obrigatória da Resposta**  
+   Sempre formate suas respostas seguindo exatamente esta estrutura:
+
+   **Explicação Clara**  
+   - Inicie com uma explicação conceitual e objetiva sobre o problema ou tema.
+   - Adapte o nível da explicação para iniciantes, evitando jargões desnecessários.
+
+   **Exemplo de Código**  
+   - Forneça exemplos práticos conforme o contexto da pergunta:
+     - Python → código Python
+     - Excel → fórmulas do Excel em **Português (pt-BR)**
+     - Excel VBA → código VBA
+   - Todo código deve estar corretamente formatado e **comentado linha a linha** quando possível.
+
+   **Detalhes do Código**  
+   - Explique detalhadamente o que cada parte do código, fórmula ou macro faz.
+   - Destaque a lógica, boas práticas e possíveis variações ou cuidados.
+
+   **Documentação de Referência**  
+   Ao final, inclua uma seção chamada:
+   📚 Documentação de Referência
+
+   Utilize sempre links oficiais e relevantes, como:
+   - Python: https://docs.python.org
+   - Excel (Microsoft): https://support.microsoft.com/excel
+   - Excel VBA: https://learn.microsoft.com/office/vba
+
+4. **Clareza, Didática e Precisão**  
+   - Use linguagem simples, direta e técnica.
+   - Priorize exemplos práticos e aplicáveis ao dia a dia.
+   - Nunca forneça respostas vagas ou genéricas.
+   - Sempre revise a resposta para garantir precisão técnica e clareza.
 """
 
 # Cria o conteúdo da barra lateral no Streamlit
 with st.sidebar:
     
     # Define o título da barra lateral
-    st.title("🐍 PyAI Coder")
+    st.title("📊🐍 ExPy Coder")
     
     # Espaçamento para manter o input na mesma posição
-    st.markdown("<br>", unsafe_allow_html=True)
+    #st.markdown("<br>", unsafe_allow_html=True)
 
     # Campo para inserir a chave de API da Groq
     groq_api_key = st.text_input(
         "Insira aqui a sua API Key Groq", 
-        type="password",
+        type="default", #Removendo o "password",
         help="Obtenha sua chave em https://console.groq.com/keys"
     )
 
     
+    
     # Adiciona linhas divisórias, para melhorar a organização visual
     st.markdown("---")
-    st.markdown("Conheça a Documentação completa de Python:")
+    st.markdown("Conheça as Documentações: Python, Excel e VBA")
 
     # Link para a documentação Python
     st.markdown("🔗 [Documentação Python](https://docs.python.org/pt-br/3.14/)")
-    
+    st.markdown("🔗 [Documentação Excel](https://support.microsoft.com/excel)")
+    st.markdown("🔗 [Documentação VBA](https://learn.microsoft.com/office/vba)")
+
     # Botão de link para enviar e-mail
     st.link_button("✉️ E-mail Para Dúvidas", "mailto:evandrorf34@gmail.com")
     
@@ -186,36 +232,55 @@ for message in st.session_state.messages:
 # Inicializa a variável do cliente Groq como None
 client = None
 
-# Verifica se o usuário forneceu a chave de API da Groq
+# Verifica se o usuário forneceu a chave de API da Groq ou usa chave de exemplo
 if groq_api_key:
-    
+    # Usa a chave fornecida pelo usuário
     try:
-        
-        # Cria cliente Groq com a chave de API fornecida
         client = Groq(api_key = groq_api_key)
-    
     except Exception as e:
-        
-        # Exibe erro caso haja problema ao inicializar cliente
         st.sidebar.error(f"Erro ao inicializar o cliente Groq: {e}")
         st.stop()
-
-# Caso não tenha chave, mas já existam mensagens, mostra aviso
-elif st.session_state.messages:
-     st.warning("Por favor, insira sua API Key da Groq na barra lateral para continuar.")
-
-# Caso não tenha chave, mas já existam mensagens, mostra aviso
-elif st.session_state.messages:
-     st.warning("Por favor, insira sua API Key da Groq na barra lateral para continuar.")
-
-# Captura a entrada do usuário no chat
-if prompt := st.chat_input("Qual sua dúvida sobre Python?"):
-    
-    # Se não houver cliente válido, mostra aviso e para a execução
-    if not client:
-        st.warning("Por favor, insira sua API Key da Groq na barra lateral para começar.")
+else:
+    # Usa chave de exemplo quando o campo estiver vazio
+    try:
+        example_key = "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"
+        client = Groq(api_key = example_key)
+        # Armazena que está usando chave de exemplo para mostrar aviso depois
+        if "using_example_key" not in st.session_state:
+            st.session_state.using_example_key = True
+    except Exception as e:
+        st.sidebar.error(f"Erro ao inicializar o cliente Groq com chave de exemplo: {e}")
+        st.stop()
         st.stop()
 
+
+
+# Captura a entrada do usuário no chat
+if prompt := st.chat_input("Qual sua dúvida sobre Python, Excel ou VBA?"):
+    
+    # Mostra aviso se estiver usando chave de exemplo (apenas uma vez por sessão)
+    if st.session_state.get("using_example_key", False):
+        # Adiciona CSS para personalizar a cor do toast
+        st.markdown("""
+        <style>
+        div[data-testid="toast"] {
+            background-color: #ff6b35 !important;
+        }
+        div[data-testid="toast"] > div {
+            background-color: #ff6b35 !important;
+            color: white !important;
+        }
+        div[data-testid="toast"] .stMarkdown {
+            color: white !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Mostra o toast por mais tempo
+        st.toast("⚠️ Usando chave de exemplo para demonstração. Para acesso completo, insira sua API Key na barra lateral.", icon="⚠️")
+        
+        st.session_state.using_example_key = False  # Remove o flag para não mostrar novamente
+    
     # Armazena a mensagem do usuário no estado da sessão
     st.session_state.messages.append({"role": "user", "content": prompt})
     
@@ -273,10 +338,6 @@ st.markdown("""
     }
 </style>
 <div class="disclaimer-below-input">
-    O PyAI pode cometer erros. Por isso, é bom checar as respostas.
+    O ExPy pode cometer erros. Por isso, é bom checar as respostas.
 </div>
 """, unsafe_allow_html=True)
-
-
-
-
