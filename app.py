@@ -145,7 +145,6 @@ with st.sidebar:
     
     # Espaçamento para manter o input na mesma posição
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<br>", unsafe_allow_html=True)
 
     # Campo para inserir a chave de API da Groq
     groq_api_key = st.text_input(
@@ -155,7 +154,6 @@ with st.sidebar:
     )
 
     
-    st.markdown("<br>", unsafe_allow_html=True)
     # Adiciona linhas divisórias, para melhorar a organização visual
     st.markdown("---")
     st.markdown("Conheça a Documentação completa de Python:")
