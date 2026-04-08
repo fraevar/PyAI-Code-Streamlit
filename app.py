@@ -10,7 +10,7 @@ import streamlit as st
 from groq import Groq
 
 # Importa a biblioteca Google Generative AI para fallback com Gemini
-from google import generativeai as genai
+import google.generativeai as genai
 
 from dotenv import load_dotenv
 # Configura a página do Streamlit com título, ícone, layout e estado inicial da sidebar
