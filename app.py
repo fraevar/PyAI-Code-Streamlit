@@ -9,12 +9,15 @@ import streamlit as st
 # Importa a classe Groq para se conectar à API da plataforma Groq e acessar o LLM
 from groq import Groq
 
+# Importa a biblioteca Google Generative AI para fallback com Gemini
+from google import generativeai as genai
 
 from dotenv import load_dotenv
 # Configura a página do Streamlit com título, ícone, layout e estado inicial da sidebar
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 st.set_page_config(
     page_title="ExPy Coder",
@@ -35,7 +38,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Adiciona estrelas suaves e animadas
+# Adiciona estrelas suaves e animadas para uma melhor experiência visual
 st.markdown("""
 <style>
     .stars {
@@ -130,80 +133,50 @@ st.markdown("""
 
 # Define um prompt de comando que descreve as regras e comportamento da LLM
 CUSTOM_PROMPT = """
-Você é o "ExPy Coder", um assistente de IA especialista em programação e automação, com foco em Python, Excel e Excel VBA.  
-Sua missão é ajudar desenvolvedores iniciantes e usuários de Excel a resolver problemas de programação, automação e análise de dados de forma clara, precisa e didática.
+Você é um assistente técnico de programação com foco em Python, Excel e VBA.
+Responda de forma direta, objetiva e didática.
 
-REGRAS DE OPERAÇÃO:
+Regras obrigatórias:
+- Não se apresente, não use saudações como "Olá".
+- Não diga "Eu sou" ou "Meu nome é".
+- Responda apenas à pergunta do usuário.
+- Não inclua texto introdutório ou autoapresentação.
 
-1. **Foco em Programação e Automação**  
-   Responda exclusivamente a perguntas relacionadas a:
-   - Python (lógica, scripts, automação, análise de dados, bibliotecas)
-   - Excel (fórmulas, funções, tabelas, Power Query, boas práticas)
-   - Excel VBA (macros, automação, manipulação de planilhas, formulários, eventos)
-   - Integração entre Python e Excel (quando aplicável)
+Foco:
+- Python (lógica, scripts, automação, análise de dados, bibliotecas)
+- Excel (fórmulas, funções, tabelas, Power Query, boas práticas)
+- Excel VBA (macros, automação, manipulação de planilhas, formulários, eventos)
+- Integração entre Python e Excel quando aplicável.
 
-   Caso o usuário pergunte sobre assuntos fora desse escopo, responda educadamente que seu foco é exclusivamente programação, automação e uso técnico do Excel.
+Idioma e formato do Excel:
+- Use fórmulas em Português do Brasil (pt-BR).
+- Utilize nomes de funções em português, por exemplo: SE, PROCV, SOMASE, ÍNDICE, CORRESP.
+- Use ponto e vírgula (`;`) como separador de argumentos nas fórmulas.
 
-2. **Idioma e Localidade do Excel (REGRA OBRIGATÓRIA)**  
-   - **Todas as fórmulas do Excel DEVEM ser escritas em Português do Brasil (pt-BR)**.
-   - Utilize **nomes de funções em português** (ex: `SE`, `PROCV`, `SOMASE`, `ÍNDICE`, `CORRESP`).
-   - Utilize **ponto e vírgula (`;`) como separador de argumentos**, nunca vírgula.
-   - Caso exista diferença entre funções do Excel em inglês e português, **priorize sempre a versão em português**.
-   - Se for relevante, pode mencionar entre parênteses o nome da função em inglês, **apenas como referência**, nunca como fórmula principal.
-
-3. **Estrutura Obrigatória da Resposta**  
-   Sempre formate suas respostas seguindo exatamente esta estrutura:
-
-   **Explicação Clara**  
-   - Inicie com uma explicação conceitual e objetiva sobre o problema ou tema.
-   - Adapte o nível da explicação para iniciantes, evitando jargões desnecessários.
-
-   **Exemplo de Código**  
-   - Forneça exemplos práticos conforme o contexto da pergunta:
-     - Python → código Python
-     - Excel → fórmulas do Excel em **Português (pt-BR)**
-     - Excel VBA → código VBA
-   - Todo código deve estar corretamente formatado e **comentado linha a linha** quando possível.
-
-   **Detalhes do Código**  
-   - Explique detalhadamente o que cada parte do código, fórmula ou macro faz.
-   - Destaque a lógica, boas práticas e possíveis variações ou cuidados.
-
-   **Documentação de Referência**  
-   Ao final, inclua uma seção chamada:
-   📚 Documentação de Referência
-
-   Utilize sempre links oficiais e relevantes, como:
-   - Python: https://docs.python.org
-   - Excel (Microsoft): https://support.microsoft.com/excel
-   - Excel VBA: https://learn.microsoft.com/office/vba
-
-4. **Clareza, Didática e Precisão**  
-   - Use linguagem simples, direta e técnica.
-   - Priorize exemplos práticos e aplicáveis ao dia a dia.
-   - Nunca forneça respostas vagas ou genéricas.
-   - Sempre revise a resposta para garantir precisão técnica e clareza.
+Estrutura básica da resposta:
+- Explique o conceito de forma clara e objetiva.
+- Forneça um exemplo de código prático quando for relevante.
+- Explique o código em seguida.
+- Inclua referências quando fizer sentido.
 """
 
 # Cria o conteúdo da barra lateral no Streamlit
 with st.sidebar:
-    
+
     # Define o título da barra lateral
     st.title("📊🐍 ExPy Coder")
-    
+
     # Espaçamento para manter o input na mesma posição
-    #st.markdown("<br>", unsafe_allow_html=True)
+    # st.markdown("<br>", unsafe_allow_html=True)
 
     # Campo para inserir a chave de API da Groq
 
     groq_api_key_input = st.text_input(
-        "Insira aqui a sua API Key Groq", 
+        "Insira aqui a sua API Key Groq",
         type="password",
         help="Obtenha sua chave em https://console.groq.com/keys"
     )
 
-    
-    
     # Adiciona linhas divisórias, para melhorar a organização visual
     st.markdown("---")
     st.markdown("Conheça as Documentações: Python, Excel e VBA")
@@ -215,15 +188,14 @@ with st.sidebar:
 
     # Botão de link para enviar e-mail
     st.link_button("✉️ E-mail Para Dúvidas", "mailto:evandrorf34@gmail.com")
-    
+
     # Assinatura do desenvolvedor
     st.markdown("---")
     st.markdown(
         "<div style='text-align: center; color: #888888; font-size: 0.8rem; margin-top: 1rem;'>"
-        "💻 Desenvolvido por<br><strong>Evandro Franco</strong></div>", 
+        "💻 Desenvolvido por<br><strong>Evandro Franco</strong></div>",
         unsafe_allow_html=True
     )
-
 
 
 # Inicializa o histórico de mensagens na sessão, caso ainda não exista
@@ -279,10 +251,10 @@ if not st.session_state.get("api_warning_shown", False):
 
 # Captura a entrada do usuário no chat
 if prompt := st.chat_input("Qual sua dúvida sobre Python, Excel ou VBA?"):
-   
+
     # Armazena a mensagem do usuário no estado da sessão
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
+
     # Exibe a mensagem do usuário no chat
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -290,36 +262,70 @@ if prompt := st.chat_input("Qual sua dúvida sobre Python, Excel ou VBA?"):
     # Prepara mensagens para enviar à API, incluindo prompt de sistema
     messages_for_api = [{"role": "system", "content": CUSTOM_PROMPT}]
     for msg in st.session_state.messages:
-        
+
         messages_for_api.append(msg)
 
     # Cria a resposta do assistente no chat
     with st.chat_message("assistant"):
-        
+
         with st.spinner("Analisando sua pergunta..."):
-            
+
             try:
-                
+
                 # Chama a API da Groq para gerar a resposta do assistente
                 chat_completion = client.chat.completions.create(
-                    messages = messages_for_api,
-                    model = "openai/gpt-oss-20b", 
-                    temperature = 0.7,
-                    max_tokens = 2048,
+                    messages=messages_for_api,
+                    model="openai/gpt-oss-20b",
+                    temperature=0.7,
+                    max_tokens=2048,
                 )
-                
+
                 # Extrai a resposta gerada pela API
                 dsa_ai_resposta = chat_completion.choices[0].message.content
-                
+
                 # Exibe a resposta no Streamlit
                 st.markdown(dsa_ai_resposta)
-                
-                # Armazena resposta do assistente no estado da sessão
-                st.session_state.messages.append({"role": "assistant", "content": dsa_ai_resposta})
 
-            # Caso ocorra erro na comunicação com a API, exibe mensagem de erro
+                # Armazena resposta do assistente no estado da sessão
+                st.session_state.messages.append(
+                    {"role": "assistant", "content": dsa_ai_resposta})
+
+            # Caso ocorra erro na comunicação com a API da Groq, tenta fallback com Gemini
             except Exception as e:
-                st.error(f"Ocorreu um erro ao se comunicar com a API da Groq: {e}")
+                error_text = str(e)
+                if "organization_restricted" in error_text or "Organization has been restricted" in error_text:
+                    st.warning(
+                        "A API da Groq está restrita pela organização. Tentando fallback com Gemini...")
+                else:
+                    st.warning(
+                        "Erro na API da Groq. Tentando fallback com Gemini...")
+
+                try:
+                    if not GEMINI_API_KEY:
+                        raise ValueError("GEMINI_API_KEY não configurada.")
+
+                    genai.configure(api_key=GEMINI_API_KEY)
+                    model = genai.GenerativeModel('models/gemini-flash-latest')
+
+                    # Prepara o prompt para Gemini, adaptando as mensagens
+                    prompt_gemini = CUSTOM_PROMPT + "\n\nHistórico da conversa:\n"
+                    for msg in messages_for_api[1:]:  # Pula o system prompt
+                        role = "Usuário" if msg["role"] == "user" else "Assistente"
+                        prompt_gemini += f"{role}: {msg['content']}\n"
+
+                    response = model.generate_content(prompt_gemini)
+                    resposta_gemini = response.text
+
+                    # Exibe a resposta do Gemini
+                    st.markdown(resposta_gemini)
+
+                    # Armazena resposta do assistente no estado da sessão
+                    st.session_state.messages.append(
+                        {"role": "assistant", "content": resposta_gemini})
+
+                except Exception:
+                    st.warning(
+                        "Não foi possível obter resposta da LLM no momento. Tente novamente em instantes.")
 
 # Texto de aviso simples
 st.markdown("""
